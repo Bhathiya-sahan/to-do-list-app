@@ -9,7 +9,7 @@ function App() {
   const [allTodos, setTodos] = useState([]);
   const [newTitle,setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const [completedTodos, setCompletedTodos] = useState("");
+  const [completedTodos, setCompletedTodos] = useState([]);
 
   const handleAddNewToDo =()=>{
     let newToDoItem = {
@@ -20,12 +20,12 @@ function App() {
     let updatedTodoArr =[...allTodos];
     updatedTodoArr.push(newToDoItem);
     setTodos(updatedTodoArr);
-    localStorage.setItem('todolist',JSON.stringify(updatedTodoArr))
+    localStorage.setItem('todolist',JSON.stringify(updatedTodoArr));
   };
 
   const handleDeleteTodo = (index)=>{
     let reducaedTodo = [...allTodos];
-    reducaedTodo.splice(index);
+    reducaedTodo.splice(index,1);
 
     localStorage.setItem('todolist', JSON.stringify(reducaedTodo));
     setTodos(reducaedTodo);
@@ -50,13 +50,26 @@ function App() {
     updatedCompletedArr.push(filteredItem);
     setCompletedTodos(updatedCompletedArr);
     handleDeleteTodo(index);
-  }
+    localStorage.setItem('completedTodos', JSON.stringify(updatedCompletedArr));
+  };
+
+  const handleDeleteCompletedTodo =(index)=>{
+    let reducaedTodo = [...completedTodos];
+    reducaedTodo.splice(index,1);
+
+    localStorage.setItem('completedTodos', JSON.stringify(reducaedTodo));
+    setCompletedTodos(reducaedTodo);
+  };
 
 
   useEffect(()=>{
     let savedTodo = JSON.parse(localStorage.getItem('todolist'));
+    let savedCompletedTodo = JSON.parse(localStorage.getItem('completedTodos'));
     if(savedTodo){
       setTodos(savedTodo);
+    }
+    if(savedCompletedTodo){
+      setCompletedTodos(savedCompletedTodo);
     }
   },[])
 
@@ -77,7 +90,7 @@ function App() {
           </div>
 
           <div className='todo-input-item'>
-            <button type='button' onClick={handleAddNewToDo} className='primaryBtn'>Add</button>
+            <button type='button' onClick={handleAddNewToDo} className='primaryBtn '>Add</button>
           </div>
           </div>
         <div className='btn-area'>
@@ -107,7 +120,6 @@ function App() {
 
       {isCompletedScreen === true && completedTodos.map((item,index)=>{
           return(
-
             <div className='todo-list-item' key={index}>
             <div>
               <h3>{item.title}</h3>
@@ -116,7 +128,7 @@ function App() {
             </div>
 
             <div>
-              <AiFillDelete className='icon' onClick={()=>handleDeleteTodo(index)} title='Delete?'/>
+              <AiFillDelete className='icon' onClick={()=>handleDeleteCompletedTodo(index)} title='Delete?'/>
             </div>
 
           </div>
