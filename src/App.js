@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import './App.css';
 import {AiFillDelete} from 'react-icons/ai';
 import {AiFillCheckCircle} from 'react-icons/ai';
@@ -9,17 +9,56 @@ function App() {
   const [allTodos, setTodos] = useState([]);
   const [newTitle,setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [completedTodos, setCompletedTodos] = useState("");
 
   const handleAddNewToDo =()=>{
-  let newToDoObj = {
-    title: newTitle,
-    description: newDescription,
+    let newToDoItem = {
+      title: newTitle,
+      description: newDescription,
+    };
+
+    let updatedTodoArr =[...allTodos];
+    updatedTodoArr.push(newToDoItem);
+    setTodos(updatedTodoArr);
+    localStorage.setItem('todolist',JSON.stringify(updatedTodoArr))
   };
 
-  let updatedTodoArr =[...allTodos];
-  updatedTodoArr.push(newTodoItem);
-  setTodos(updatedTodoArr);
-}
+  const handleDeleteTodo = (index)=>{
+    let reducaedTodo = [...allTodos];
+    reducaedTodo.splice(index);
+
+    localStorage.setItem('todolist', JSON.stringify(reducaedTodo));
+    setTodos(reducaedTodo);
+  };
+
+  const handlComplete = (index) =>{
+    let now = new Date();
+    let dd = now.getDate();
+    let mm = now.getMonth();
+    let yyyy = now.getFullYear();
+    let h = now.getHours() ;
+    let m = now.getMinutes();
+    let s = now.getSeconds();
+    let completeOn = dd + '-' + mm + '-' + yyyy + 'at' + h + ':' + m + ':' + s;
+
+    let filteredItem ={
+      ...allTodos[index],
+      completeOn:completeOn
+    }
+
+    let updatedCompletedArr = [...completedTodos];
+    updatedCompletedArr.push(filteredItem);
+    setCompletedTodos(updatedCompletedArr);
+    handleDeleteTodo(index);
+  }
+
+
+  useEffect(()=>{
+    let savedTodo = JSON.parse(localStorage.getItem('todolist'));
+    if(savedTodo){
+      setTodos(savedTodo);
+    }
+  },[])
 
   return (
     <div className="App">
@@ -47,7 +86,7 @@ function App() {
         </div>
 
         <div className='todo-list'>
-         {allTodos.map((item,index)=>{
+         {isCompletedScreen === false && allTodos.map((item,index)=>{
           return(
 
             <div className='todo-list-item' key={index}>
@@ -57,13 +96,34 @@ function App() {
             </div>
 
             <div>
-              <AiFillDelete className='icon'/>
-              <AiFillCheckCircle className='check-icon'/>
+              <AiFillDelete className='icon' onClick={()=>handleDeleteTodo(index)} title='Delete?'/>
+              <AiFillCheckCircle className='check-icon' onClick={()=>handlComplete(index)} title='Complete?'/>
             </div>
 
           </div>
           )
          })}
+
+
+      {isCompletedScreen === true && completedTodos.map((item,index)=>{
+          return(
+
+            <div className='todo-list-item' key={index}>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <p><small>Completed on: {item.completeOn}</small></p>
+            </div>
+
+            <div>
+              <AiFillDelete className='icon' onClick={()=>handleDeleteTodo(index)} title='Delete?'/>
+            </div>
+
+          </div>
+          )
+         })}
+
+
         </div>
 
         </div>
